@@ -4,7 +4,6 @@ import { TextField, Paper, Button, Grid} from "@mui/material";
 class AppTodo extends React.Component {
     constructor(props){
         super(props);
-        console.log(props);                         // 전달된 인자들
         this.state = { item: { title: "" } };       // 사용자의 입력을 저장할 오브젝트
         this.add = props.add;
     }

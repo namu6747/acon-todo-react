@@ -2,15 +2,15 @@ import React from 'react';
 import Todo from './Todo';
 import AppTodo from './AppTodo';
 import './App.css';
-import { List, Paper } from '@mui/material';
-import { Container } from '@mui/system';
-import { call } from './service/ApiService';
+import { Paper, List, Container, Grid, Button, AppBar, Toolbar, Typography } from '@mui/material';
+import { call, signout } from './service/ApiService';
 
 class App extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      items: []
+      items: [],
+      loading: true,
     }
   }
 
@@ -18,37 +18,12 @@ class App extends React.Component {
     call("/todo","POST",item).then((response) =>
     this.setState({ items: response.data })
     );
-
-    /*
-    const thisItems = this.state.items;
-    item.id = "ID-"+thisItems.length;
-    item.done = false;
-    thisItems.push(item);
-    this.setState({ items: thisItems });
-    console.log("items : ", this.state.items);
-    */
   }
 
   delete = (item) => {
     call("/todo","DELETE",item).then((response) => 
       this.setState({ items: response.data })
     )
-
-    /*
-    const thisItems = this.state.items;
-    console.log("Before Update Items : ", this.state.items);
-    const newItems = thisItems.filter(e => {
-      let flag = e.id !== item.id;
-      console.log('e : ',e);
-      console.log('item : ',item);
-      console.log(flag);
-      return flag;
-    });
-    console.log(newItems);
-    this.setState({ items: newItems }, () => {
-      console.log("Update Items : ", this.state.items)
-    })
-    */
   }
 
   update = (item) => {
@@ -58,34 +33,14 @@ class App extends React.Component {
   }
 
   componentDidMount(){
-
-    call("/todo", "GET", null).then((response) =>
-      {console.log(response);
-      return this.setState({ items: response.data});
+    call("/todo", "GET", null)
+    .then((response) =>
+      {
+        return this.setState({ items: response.data, loading: false});
       }
-    );
-    
-    /*
-    const requestOptions = {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    };
-
-    fetch("http://localhost:8080/todo", requestOptions)
-      .then((response) => response.json())
-      .then(
-        (response) => {
-          this.setState({
-            items: response.data,
-          });
-        },
-        (error) => {
-          this.setState({
-            error,
-          })
-        }
-      );
-    */
+    )
+    .catch((error) => {
+    });
   }
 
   render(){
@@ -104,42 +59,49 @@ class App extends React.Component {
       </Paper>
     );
 
+    var navigationBar = (
+      <AppBar position="static">
+        <Toolbar>
+          <Grid justifyContent="space-between" container>
+            <Grid item>
+              <Typography variant='h6'>
+                오늘의 할일
+              </Typography>
+            </Grid>
+            <Grid>
+              <Button color='inherit' onClick={signout}>
+                로그아웃
+              </Button>
+            </Grid>
+          </Grid>
+        </Toolbar>
+      </AppBar>
+    )
+
+    var todoListPage = (
+        <div>
+          { navigationBar }
+          <Container maxWidth="md">
+            <AppTodo add={this.add} />
+            <div className='TodoList'>
+              {todoItems}
+            </div>
+          </Container>
+        </div>
+    );
+
+    var loadingPage = <h1> 로딩중 ..</h1>;
+
+    var content = loadingPage;
+
+    if(!this.state.loading){
+      content = todoListPage;
+    }
+
     return <div className='App'>
-              <Container maxWidth="md">
-                <AppTodo add={this.add} />
-                <div className='TodoList'>{todoItems}</div>
-              </Container>
+              {content}
           </div>;
-    
-    /*
-    var todoItems = this.state.items.map((item, idx) => (
-        <Todo item={item} key={item.id} />
-      ));
-    */
   }
 }
 
-/*
-function App() {
-  return (
-    <div className="App">
-      <Todo />
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-*/
 export default App;
